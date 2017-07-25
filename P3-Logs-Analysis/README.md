@@ -16,8 +16,9 @@ After you have followed Udacity's instructions and installed the virtual machine
 
 1. Create the Views listed below in the `news` database.
 2. Open a new terminal and Clone the repository with `git clone https://www.github.com/nehal96/full-stack-nd`
-3. Move `newsreport.py` into the vagrant directory
-4. Execute the file by running the command: `python3 newsreport.py`.
+3. Move `newsreport.py` into the `vagrant` directory
+4. If you haven't already, boot up virtual machine with `vagrant up` followed by `vagrant ssh`.
+4. Inside VM, execute the file by running the command: `python3 newsreport.py`.
 
 ### The Program Design
 
