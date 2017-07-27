@@ -25,7 +25,7 @@ print("Question 1: What are the three most popular articles of all time? \n")
 
 result = cur.fetchall()
 for i, (title, views) in enumerate(result):
-    print("{}. {}: {} views".format(i+1, title, views))
+    print("{0}. {1}: {2} views".format(i+1, title, views))
 
 print("\n\n")
 
@@ -47,23 +47,23 @@ print("Question 2: Who are the most popular article authors of all time? \n")
 
 result = cur.fetchall()
 for i, (author, views) in enumerate(result):
-    print("{}. {}: {} views".format(i+1, author, views))
+    print("{0}. {1}: {2} views".format(i+1, author, views))
 
 print("\n\n")
 
 # SQL statement for Question 3
 # See README for the 3 views created and used in this SQL statement:
 # successful, failed, and percent_failed
-cur.execute("""SELECT to_char(date, 'Month DD, YYYY'), percent
+cur.execute("""SELECT to_char(date, 'FMMonth DD, YYYY'), percent
                FROM percent_failed
                WHERE percent > 1;""")
 # Print question and answer
-print("Question 3: On which days did more than 1% of the requests lead \
-       to errors? \n")
+print("Question 3: On which days did more than 1% of the requests lead "
+      "to errors? \n")
 
 result = cur.fetchall()
 for i, (date, percent) in enumerate(result):
-    print("{}. {}: {}%".format(i+1, date, percent))
+    print("{0}. {1}: {2:.2f}%".format(i+1, date, percent))
 
 print("\n\n")
 
