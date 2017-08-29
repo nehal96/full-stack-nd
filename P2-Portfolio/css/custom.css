@@ -1,0 +1,60 @@
+body {
+  font-family: 'Open Sans', sans-serif;
+  margin-bottom: 30px;
+}
+
+#logo {
+  margin-top: 20px;
+}
+
+#title > h1 {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 300;
+  font-size: 60px;
+  margin-bottom: 5px;
+  color: #2d3c49;
+}
+
+#title > h3 {
+  font-family: 'Open Sans', sans-serif;
+  font-weight:300;
+  font-size: 20px;
+  margin-top: 5px;
+  color: #2d3c49;
+}
+
+@media screen and (max-width: 700px) {
+  #title > h1 {
+    font-size: 40px;
+  }
+  #title > h3 {
+    font-size: 15px;
+  }
+  #featured-work > h2 {
+    font-size: 25px;
+  }
+}
+
+#main-picture {
+  margin-top: 20px;
+}
+
+#featured-work {
+  color: #7d97ad;
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+.project-tile {
+  margin-bottom: 30px;
+}
+
+.project-tile > h3 {
+  color: #2d3c49;
+}
+
+.project-tile > img:hover {
+  cursor: pointer;
+  filter: drop-shadow(8px 8px 20px) opacity(25%);
+  transition: .3s all;
+}
