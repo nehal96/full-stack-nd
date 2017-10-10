@@ -12,7 +12,7 @@ These are the steps taken to configure an Ubuntu Linux server to run a Flask web
 
 ### SSH from Terminal
 
-* **Configure SSH from Terminal**:
+**Configure SSH from Terminal**:
   1. Download your default private key from your Amazon Lightsail account by clicking on `Account > SSH keys > Download`.
 
   2. On Terminal, first change the permissions for using the private key by running the command `chmod 400 /path/to/your/key/**.pem`. (`**.pem` is a placeholder for the private key name, a file which ends with `.pem`).
@@ -23,19 +23,19 @@ These are the steps taken to configure an Ubuntu Linux server to run a Flask web
 
 ### Securing the Server
 
-* **Update all currently installed packages**:
+**Update all currently installed packages**:
   1. Run the command `sudo apt-get update` to check all available packages and its versions.
 
   2. Run the command `sudo apt-get upgrade` to check which packages can be upgraded. Enter `Y` when prompted to continue with the upgrading.
 
-* **Change SSH port from 22 to 2200**:
+**Change SSH port from 22 to 2200**:
   1. First, enable the 2200 port on Amazon Lightsail so we won't get locked out of the server. Go on your Lightsail server interface, click on the `Networking` tab, go to the `Firewall` sub-section which has SSH and HTTP and click `Add Another`. Put 'Application' as `Custom`, 'Protocol' as `TCP`, and in 'Port' enter `2200`.
 
   2. Edit the SSH config file to change the Port No. from 22 to 2200. Run the command `sudo nano /etc/ssh/sshd_config` to open up an editor on Terminal. On Line 5, change `Port 22` to `Port 2200`, save the file and then exit.
 
   3. Run `sudo service ssh restart` to restart the re-run the ssh config.
 
-* **Setup firewall settings**:
+**Setup firewall settings**:
   1. Run `sudo ufw status` to check the status of the firewall. Should read `inactive`.
 
   2. Run `sudo ufw default deny incoming` to set the firewall default to block all incoming connections.
