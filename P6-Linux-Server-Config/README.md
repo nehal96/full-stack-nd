@@ -115,3 +115,43 @@ Run the following commands:
 
 **Install and configure mod_wsgi package:**
   1. Run `sudo apt-get install libapache2-mod-wsgi` to install mod_wsgi. The package allows Apache to host Flask applications.
+
+**Install PostgreSQL and disable remote connections:**
+  1. Run `sudo apt-get install postgresql` to install PostgreSQL.
+  2. Disabled remote connections are default after installation, but we can double check by looking in the host based authentication file with `sudo nano /etc/postgresql/9.5/main/pg_hba.conf`. It should look like this:
+
+  ```
+  # Database administrative login by Unix domain socket
+  local   all             postgres                                peer
+
+  # TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+  # "local" is for Unix domain socket connections only
+  local   all             all                                     peer
+
+  # IPv4 local connections:
+  host    all             all             127.0.0.1/32            md5
+
+  # IPv6 local connections:
+  host    all             all             ::1/128                 md5
+  ```
+
+  The first two non-commented lines are local in their scope (under `TYPE` heading). The other two non-commented lines are for remote hosts, but if you look in the `ADDRESS` column, you'll see they are local addresses too (`127.0.0.1/32` and `::1/128`).
+
+**Create database user `catalog` with limited permissions:**
+  1. During installation, PostgreSQL creates a default user `postgres` to operate under. Log into this user with the command `sudo su - postgres`.
+  2. Log into the PostgreSQL prompt interface with the command `psql`.
+  3. In the prompt interface, create user named catalog with the command `CREATE USER catalog;`.
+  4. [Optional] Run `\du` to check user/role information. It should look like this:
+    ```
+                                        List of roles
+      Role name |                         Attributes                         | Member of
+      -----------+------------------------------------------------------------+-----------
+      catalog   |                                                            | {}
+      postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+    ```
+  5. Exit the prompt interface by running `\q`.
+  6. Switch to main user `ubuntu` by running `logout`.
+
+**Install Git:**
+  1. Run `sudo apt-get install git` to install Git.
