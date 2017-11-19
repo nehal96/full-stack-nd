@@ -114,7 +114,7 @@ Run the following commands:
   2. Test install by pasting the public IP of your Amazon Lightsail instance into any browser's URL field. The default Apache page should load if it's been installed correctly.
 
 **Install and configure mod_wsgi package:**
-  1. Run `sudo apt-get install libapache2-mod-wsgi` to install mod_wsgi. The package allows Apache to host Flask applications.
+  1. Run `sudo apt-get install libapache2-mod-wsgi python-dev` to install mod_wsgi. The package allows Apache to host Flask applications.
 
 **Install PostgreSQL and disable remote connections:**
   1. Run `sudo apt-get install postgresql` to install PostgreSQL.
@@ -142,16 +142,102 @@ Run the following commands:
   1. During installation, PostgreSQL creates a default user `postgres` to operate under. Log into this user with the command `sudo su - postgres`.
   2. Log into the PostgreSQL prompt interface with the command `psql`.
   3. In the prompt interface, create user named catalog with the command `CREATE USER catalog;`.
-  4. [Optional] Run `\du` to check user/role information. It should look like this:
+  4. Give the `catalog` user database creation permissions with the command `ALTER ROLE catalog CREATEDB;`
+  5. [Optional] Run `\du` to check user/role information. It should look like this:
     ```
                                         List of roles
       Role name |                         Attributes                         | Member of
       -----------+------------------------------------------------------------+-----------
-      catalog   |                                                            | {}
+      catalog   | Create DB                                                  | {}
       postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+
     ```
   5. Exit the prompt interface by running `\q`.
   6. Switch to main user `ubuntu` by running `logout`.
 
+**Create Linux user 'catalog':**
+  1. Create a new Linux user with `sudo adduser catalog`. Complete all the steps (creating password, filling out info).
+  2. Give user `catalog` sudo permissions by:
+    - Add a new file in the `sudoers.d` directory with `sudo nano /etc/sudoers.d/catalog`.
+    - In the file, add the following: `catalog ALL=(ALL:ALL) ALL`
+  3. Check if `catalog` has sudo permissions by switching to the user (run `sudo su - catalog`), and then run `sudo -l`. Put in the password, and a result should appear that displays the same permission information as above (`(ALL : ALL) ALL`).
+  4. While logged in as `catalog`, create a new database named `catalog` with `createdb catalog`.
+  5. Enter PostgreSQL with `psql` and run `\l` to check if the new database has been created.
+  6. Run `\q` to exit PostreSQL.
+  7. Run `logout` to go back to the being `ubuntu`.
+
 **Install Git:**
   1. Run `sudo apt-get install git` to install Git.
+
+
+### Cloning and Setting Up Catalog App
+**Clone Listopia:**
+  1. Create a new directory called `listopia` in the `/var/www` directory (Run the command `sudo mkdir listopia`).
+  2. Enter the directory, and clone the item catalog project with `sudo git clone https://github.com/nehal96/listopia.git`.
+  3. Change the name of `application.py` to `__init__.py` by running `sudo mv application.py __init__.py`.
+  4. Enter `__init__.py` and go to the bottom of the file. Remove the `app.debug` and `app.secret_key` variables and change `app.run(port=8000)` to just `app.run()`.
+
+**Create a Virtual Environment and Install Packages:**
+  1. Install pip with `sudo apt-get install python-pip`
+  2. Install virtualenv with `sudo apt-get install python-virtualenv`
+  3. Enter the directory `/var/www/listopia/listopia/` and create a virtual environment with the command `virtualenv venv`.
+  4. Activate the virtual environment with `source venv/bin/activate`.
+  5. While inside the virtual environment, install the following packages:
+    - `pip install flask`
+    - `pip install httplib2`
+    - `pip install sqlalchemy`
+    - `pip install requests`
+    - `pip install --upgrade oauth2client`
+    - `pip install psycopg2`
+    - `pip install google`
+    - `pip instll google_auth_oauthlib`
+  6. Test if everything is working all right by running the `__init__.py` file. If you get `Running on http://127.0.0.1:5000/`, that means there's no dependency issues.
+  7. Exit and deactivate virtual environment with command `deactivate`.
+
+**Set up Virtual Host:**
+  1. Enter the apache2 directory with `cd /etc/apache2/sites-available/`
+  2. Create and enter configuration file with `sudo nano listopia.conf`
+  3. Inside the file, add the following:
+    ```
+    <VirtualHost *:80>
+      ServerName XX.XXX.XX.XXX
+      ServerAdmin ubuntu@XX.XXX.XX.XXX
+      WSGI ScriptAlias / /var/www/listopia/listopia.wsgi
+      <Directory /var/www/listopia/listopia/>
+        Order allow,deny
+        Allow from all
+      </Directory>
+      Alias /static /var/www/listopia/listopia/static
+      <Directory /var/www/listopia/listopia/static/>
+        Order allow,deny
+        Allow from all
+      </Directory>
+      ErrorLog ${APACHE_LOG_DIR}/error.log
+      LogLevel warn
+      CustomLog ${APACHE_LOG_DIR}/access.log combined
+    </VirtualHost>
+    ```
+  4. Enable the virtual host with `sudo a2ensite listopia`. You'll get the following response:
+    ```
+    Enabling site listopia.
+    To activate the new configuration, you need to run:
+      service apache2 reload
+    ```
+  We'll do this after we've set up the `listopia.wsgi` file.
+
+**Create the WSGI file:**
+  1. Go to the listopia directory with `cd /var/www/listopia`
+  2. Create the file with `sudo nano listopia.wsgi`
+  3. Add the following in the file:
+    ```
+    #!/usr/bin/python
+    import sys
+    import logging
+
+    logging.basicConfig(stream=sys.stderr)
+    sys.path.insert(0,"/var/www/listopia/")
+
+    from listopia import app as application
+    application.secret_key = 'super_secret_key'
+    ```
+  4. Restart Apache server with `sudo service apache2 restart`
