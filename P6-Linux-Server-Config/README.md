@@ -143,6 +143,7 @@ Run the following commands:
   2. Log into the PostgreSQL prompt interface with the command `psql`.
   3. In the prompt interface, create user named catalog with the command `CREATE USER catalog;`.
   4. Give the `catalog` user database creation permissions with the command `ALTER ROLE catalog CREATEDB;`
+  6. [Optional] Add a password for the database with `ALTER USER catalog WITH PASSWORD 'insert_password_here'`.
   5. [Optional] Run `\du` to check user/role information. It should look like this:
     ```
                                         List of roles
@@ -165,6 +166,8 @@ Run the following commands:
   5. Enter PostgreSQL with `psql` and run `\l` to check if the new database has been created.
   6. Run `\q` to exit PostreSQL.
   7. Run `logout` to go back to the being `ubuntu`.
+  8. Once again enter user `postgres` with `sudo su - postgres`.
+  9. Enter `psql`, and change ownership of `catalog` database from user `postgres` user to `catalog` user with `REASSIGN OWNED BY postgres TO catalog`.
 
 **Install Git:**
   1. Run `sudo apt-get install git` to install Git.
@@ -241,3 +244,29 @@ Run the following commands:
     application.secret_key = 'super_secret_key'
     ```
   4. Restart Apache server with `sudo service apache2 restart`
+
+**Change the database engine:**
+  1. In all instances, change the `create_engine` function from sqlite to postgresql using the following template: `engine = create_engine('postgresql://user:password@localhost/database_name')`.
+  So in my case, it would be: `engine = create_engine(postgresql://catalog:*****@localhost/catalog)`.
+
+**Add URI to OAuth Providers Settings:**
+  1. Add the IP Address to the accepted URIs and redirect URIs for the OAuth providers - in my case, Google and Facebook.
+
+### Last Step: Run App!
+  1. Put the public IP address of the instance in a browser's address bar, and voila, your wonderful app will be live!
+
+  - [If it's not, check with error logs to see what went wrong by running `sudo nano /var/log/apache2/error.log`. Shortcut to get to the bottom on Mac is `^_` then `^V`].
+
+
+## Resources
+* [PostgreSQL Docs](https://www.postgresql.org/docs/9.4/static/index.html)
+* [Flask Docs](http://flask.pocoo.org/docs/0.12/deploying/mod_wsgi/#working-with-virtual-environments)
+* [SQLAlchemy Docs - Engine Configuration](http://docs.sqlalchemy.org/en/latest/core/engines.html)
+* [Digital Ocean - How To Secure PostgreSQL on an Ubuntu VPS](https://www.digitalocean.com/community/tutorials/how-to-secure-postgresql-on-an-ubuntu-vps#do-not-allow-remote-connections)
+* [Digital Ocean - How To Use Roles and Manage Grant Permissions in PostgreSQL on a VPS](https://www.digitalocean.com/community/tutorials/how-to-use-roles-and-manage-grant-permissions-in-postgresql-on-a-vps--2#how-to-log-in-as-a-different-user-in-postgresql)
+* [Digital Ocean - An Introduction to Linux Permissions](https://www.digitalocean.com/community/tutorials/an-introduction-to-linux-permissions)
+* [Digital Ocean - How To Deploy a Flask Application on an Ubuntu VPS](https://www.digitalocean.com/community/tutorials/how-to-deploy-a-flask-application-on-an-ubuntu-vps)
+* [Digital Ocean - How To Configure SSH Key-Based Authentication on a Linux Server](https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server)
+* [Ubuntu Docs - Changing the Timezone](https://help.ubuntu.com/community/UbuntuTime)
+* [Amazon Lightsail Docs](https://aws.amazon.com/documentation/lightsail/)
+* Countless StackOverflow pages.
