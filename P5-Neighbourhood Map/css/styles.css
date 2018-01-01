@@ -1,52 +1,71 @@
 html, body {
-    height: 100%;
-    margin: 0;
+  height: 100%;
+  margin: 0;
 }
 
 .container {
-    height: 100%;
-    position: relative;
+  height: 100%;
+  position: relative;
 }
 
 #menu {
-    width: 20%;
-    position: fixed;
-    top:0;
-    left: 0;
-    background: #F9F7F7;
-    height: 100%;
-    z-index: 1;
-    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+  width: 22%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: #f9f7f7;
+  opacity: 0.95;
+  height: 100%;
+  z-index: 1;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
 }
 
 #menu-content {
-    margin: 2rem;
+  margin: 2rem;
+}
+
+#menu-heading {
+  margin: 2rem;
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+#cafelist {
+  font-size: 1.4rem;
+}
+
+.cafe {
+  padding: 0.5rem 2rem;
+  margin: 0;
+}
+
+.cafe:hover {
+  cursor: pointer;
+  background-color: #eee;
 }
 
 #show-hide-cafes {
-  margin: 1rem;
-  display: flex;
-  justify-content: center;
+  margin: 2rem;
   position: fixed;
   bottom: 3rem;
 }
 
-#menu-heading {
-    margin-bottom: 3rem;
-    font-size: 1.75rem;
-    text-align: center;
+.show-hide-btn {
+  cursor: pointer;
 }
 
-.cafelist {
-    font-size: 1.4rem;
+#streetview {
+  margin: 1rem 0;
+  height: 200px;
+  width: 300px;
 }
 
 #map {
-    height: 100%;
-    position: absolute;
-    margin: 0;
-    padding: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+  height: 100%;
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }

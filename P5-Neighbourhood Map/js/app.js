@@ -2,123 +2,246 @@
 
 // Initial data
 var cafes = [
-  {name: "Angelina", location: {lat: 48.8650885, lng: 2.3284701}},
-  {name: "Café de la Paix", location: {lat: 48.870932, lng: 2.331663}},
-  {name: "Le Select", location: {lat: 48.842614, lng: 2.328408}}
+  {
+    name: "Angelina",
+    location: {lat: 48.8650885, lng: 2.3284701},
+  },
+  {
+    name: "Café de la Paix",
+    location: {lat: 48.870932, lng: 2.331663}
+  },
+  {
+    name: "Le Select",
+    location: {lat: 48.842614, lng: 2.328408},
+  },
+  {
+    name: "Café de Flore",
+    location: {lat: 48.8540539, lng: 2.3325598},
+  },
+  {
+    name: "Café Tournon",
+    location: {lat: 48.849529, lng: 2.337128},
+  },
+  {
+    name: "Le Peloton Café",
+    location: {lat: 48.855532, lng: 2.355934}
+  },
+  {
+    name: "Carette",
+    location: {lat: 48.863708, lng: 2.287209}
+  }
 ]
 
 // Initialise global variables
-var map;
+var map,
+    bounds,
+    infoWindow;
+
+// Create Foursquare API URL variables
+var baseUrl = 'https://api.foursquare.com/v2/venues/';
+var clientId = '?client_id=3KYPCSQNTMV3HYRKX5V2TNNBXPIFNSLBXCSJSGT4A352TQHR';
+var clientSecret = '&client_secret=01QBQEED02SFIDDTGEHMEYMSV4QTN1A2CCEXEMWLCM1GPKT5';
+var version = '&v=20180101';
+
 
 // Model for Cafe data
 var Cafe = function(data) {
-    this.name = data.name;
-    this.lat = data.location.lat;
-    this.lng = data.location.lng;
+  this.name = data.name;
+  this.id = data.id;
+  this.location = data.location;
+  this.summary = data.summary;
+  this.marker = ko.observable();
+  this.foursquareId = ko.observable();
+  this.address = ko.observable();
+  this.url = ko.observable();
+  this.facebook = ko.observable();
+  this.instagram = ko.observable();
 }
 
-// The main VM function
 var ViewModel = function() {
-    var self = this;
+  var self = this;
 
-    // Set up initial map
-    map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: 48.8619068,lng: 2.3208371},
-        styles: styles,
-        zoom: 15
+  // Set up initial map
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: {lat: 48.8619068,lng: 2.3208371},
+    styles: styles,
+    zoom: 14
+  });
+
+  // Initialise bounds object
+  bounds = new google.maps.LatLngBounds();
+
+  // Initialise info window
+  infoWindow = new google.maps.InfoWindow();
+
+  // Initialise observable array for cafes
+  this.cafeList = ko.observableArray();
+  this.markerList = ko.observableArray();
+
+  // Iterate through the data and add object to obs. array
+  cafes.forEach(function(cafeitem) {
+    self.cafeList.push(new Cafe(cafeitem));
+  });
+
+  // Iterate through each cafe in obs. array and add Foursquare Data
+  this.cafeList().forEach(function(cafe) {
+    getFoursquareData(cafe);
+  })
+
+  // Iterate through the obs. array and add functionality to the map
+  this.cafeList().forEach(function(cafe) {
+    var marker = new google.maps.Marker({
+      position: cafe.location,
+      title: cafe.name,
+      animation: google.maps.Animation.DROP,
+      map: map
     });
 
-    // Initialise observable array for lists of cafes and markers
-    this.cafeList = ko.observableArray();
-    this.markerList = ko.observableArray();
+    // Add the marker to the cafe model
+    cafe.marker = marker;
 
-    // Iterate through the data and add to the obs. array
-    cafes.forEach(function(cafeitem) {
-        self.cafeList.push(new Cafe(cafeitem));
-    });
+    // Add the marker to the markers obs. array
+    self.markerList.push(marker);
 
-    // Initialise info window
-    this.infoWindow = new google.maps.InfoWindow();
-
-    // Initialise bounds object
-    this.bounds = new google.maps.LatLngBounds();
-
-    // Iterate through obs. array and add functionality on map
-    for (i = 0; i < this.cafeList().length; i++) {
-        // Add each marker
-        this.marker = new google.maps.Marker({
-            position: {lat: self.cafeList()[i].lat, lng: self.cafeList()[i].lng},
-            title: self.cafeList()[i].name,
-            animation: google.maps.Animation.DROP,
-            map: map
-        });
-
-        // Add marker into array of markers
-        self.markerList.push(this.marker);
-
-        // When marker is clicked, open info window
-        this.marker.addListener('click', function() {
-            populateInfoWindow(this, self.infoWindow)
-        });
-
-        // Extend the bounds of the map if needed to display the marker
-        self.bounds.extend(self.markerList()[i].position);
-    }
-
-    // Apply the bounds to the map
-    map.fitBounds(this.bounds);
-
-    //
-    $('#show-hide-buttons :input').change(function() {
-      if (this.value == "show") {
-        showCafes(self.markerList());
-      } else {
-        hideCafes(self.markerList());
-      }
+    // When the marker is clicked, open info window.
+    marker.addListener('click', function() {
+      populateInfoWindow(cafe, this, infoWindow);
     })
+
+    // Extend the bounds of the map if needed to display the marker
+    bounds.extend(cafe.location);
+  })
+
+  // Apply the bounds to the map
+  map.fitBounds(bounds);
+
+  // When the show/hide radio buttons are clicked, show/hide markers
+  $('#show-hide-buttons :input').change(function() {
+    if (this.value == "show") {
+      showCafes(self.markerList());
+    } else {
+      hideCafes(self.markerList());
+    }
+  })
+
+  // Click functionality - when the cafe item is clicked on the sidebar, the
+  // infobox of that particular marker opens
+  this.cafeClick = function(cafe) {
+    google.maps.event.trigger(cafe.marker, 'click');
   }
+}
 
 // Adds content to info window for a particular marker
-function populateInfoWindow(marker, infowindow) {
-    if (infowindow.marker != marker) {
-        infowindow.marker = marker;
-        infowindow.setContent('<div>' + marker.title + '</div>')
-        infowindow.open(map, marker);
-    }
+function populateInfoWindow(cafe, marker, infowindow) {
+  if (infowindow.marker != marker) {
+    infowindow.marker = marker;
+    infowindow.setContent('');
+
+    // Resets marker info window so it can be clicked again
     infowindow.addListener('closeclick', function() {
-        infowindow.setMarker = null;
+      infowindow.marker = null;
     })
+
+    // Content string with name, address, streetview div, and contact info
+    // (Website, Facebook, Instagram)
+    var content = '<div><h6>' + cafe.name + '</h6></div>' +
+                  '<div>' + cafe.address + '</div>' +
+                  '<div id="streetview"></div>' +
+                  '<div id="cafe-contact">' +
+                  '<div><a target="_blank" href="' + cafe.url +
+                  '">Website</a></div>' + '</div>'
+
+    if (cafe.facebook) {
+      content += '<div><a target="_blank" href="https://www.facebook.com/' +
+                 cafe.facebook + '">Facebook</a></div>'
+    }
+
+    if (cafe.instagram) {
+      content += '<div><a target="_blank" href="https://www.instagram.com/' +
+                 cafe.instagram + '">Instagram</a></div>'
+    }
+
+    // Initialise StreetView obj
+    var streetViewService = new google.maps.StreetViewService();
+    var radius = 50;
+
+    function getStreetView(data, status) {
+      if (status == google.maps.StreetViewStatus.OK) {
+        var nearStreetViewLocation = data.location.latLng;
+        var heading = google.maps.geometry.spherical.computeHeading(
+          nearStreetViewLocation, marker.position);
+        infowindow.setContent(content);
+        var panoramaOptions = {
+          position: nearStreetViewLocation,
+          pov: {
+            heading: heading,
+            pitch: 10
+          }
+        }
+        var panorama = new google.maps.StreetViewPanorama(
+          document.getElementById('streetview'), panoramaOptions);
+      } else {
+        infowindow.setContent(content);
+        var div = document.createElement('h5');
+        var text = document.createTextNode("Sorry, couldn't get StreetView")
+        div.append(text)
+        document.getElementById('streetview').append(div);
+      }
+    }
+
+    streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
+
+    infowindow.open(map, marker);
+  }
+
+  infowindow.addListener('closeclick', function() {
+    infowindow.marker = null;
+  })
+}
+
+function getFoursquareData(cafe) {
+  var lat = cafe.location.lat;
+  var lng = cafe.location.lng;
+  var query = cafe.name;
+
+  var foursquareUrl = baseUrl + 'search' + clientId + clientSecret + version +
+                      '&ll=' + lat + ',' + lng + '&query=' + query +
+                      '&intent=match';
+
+  // AJAX call to Foursquare API
+  $.ajax({
+    type: 'GET',
+    url: foursquareUrl,
+    dataType: 'json',
+    success: function(data) {
+      var venue = data.response.venues[0];
+      cafe.foursquareId = venue.id;
+      cafe.address = venue.location.address;
+      cafe.url = venue.url;
+      cafe.facebook = venue.contact.facebookUsername;
+      cafe.instagram = venue.contact.instagram;
+    }
+  })
 }
 
 // Iterates through a list of markers and shows them on the map
 function showCafes(markerList) {
-  var bounds = new google.maps.LatLngBounds();
+  markerList.forEach(function(marker) {
+    marker.setMap(map);
+    bounds.extend(marker.position);
+  })
 
-  for (i = 0; i < markerList.length; i++) {
-    markerList[i].setMap(map);
-    bounds.extend(markerList[i].position);
-  }
-  map.fitBounds(bounds);;
+  map.fitBounds(bounds);
 }
 
 // Iterates through a list of markers and hides them by setting them to null
 function hideCafes(markerList) {
-  for (i = 0; i < markerList.length; i++) {
-    markerList[i].setMap(null);
-  }
+  markerList.forEach(function(marker) {
+    marker.setMap(null);
+  })
 }
-
-/*
-function openNav() {
-    document.getElementById('menu').style.width = "20%";
-};
-
-function closeNav() {
-    document.getElementById('menu').style.width = "0";
-};
-*/
 
 // Callback function to run web app
 function runApp() {
-    ko.applyBindings(new ViewModel());
-};
+  ko.applyBindings(new ViewModel());
+}
