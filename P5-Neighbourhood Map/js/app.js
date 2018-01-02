@@ -29,11 +29,16 @@ var cafes = [
   {
     name: "Carette",
     location: {lat: 48.863708, lng: 2.287209}
+  },
+  {
+    name: "Café des Deux Moulins",
+    location: {lat: 48.884921, lng: 2.333625}
   }
 ]
 
 // Initialise global variables
 var map,
+    icon,
     bounds,
     infoWindow;
 
@@ -68,6 +73,9 @@ var ViewModel = function() {
     zoom: 14
   });
 
+  // Create up marker icon
+  icon = 'img/tea-cup.png'
+
   // Initialise bounds object
   bounds = new google.maps.LatLngBounds();
 
@@ -94,6 +102,7 @@ var ViewModel = function() {
       position: cafe.location,
       title: cafe.name,
       animation: google.maps.Animation.DROP,
+      icon: icon,
       map: map
     });
 
@@ -105,6 +114,7 @@ var ViewModel = function() {
 
     // When the marker is clicked, open info window.
     marker.addListener('click', function() {
+      toggleBounce(this);
       populateInfoWindow(cafe, this, infoWindow);
     })
 
@@ -114,6 +124,11 @@ var ViewModel = function() {
 
   // Apply the bounds to the map
   map.fitBounds(bounds);
+
+  // Resizes map if browser window is resized
+  window.onresize = function() {
+    map.fitBounds(bounds);
+  }
 
   // When the show/hide radio buttons are clicked, show/hide markers
   $('#show-hide-buttons :input').change(function() {
@@ -129,6 +144,33 @@ var ViewModel = function() {
   this.cafeClick = function(cafe) {
     google.maps.event.trigger(cafe.marker, 'click');
   }
+
+  // Initialise a filter observable with an empty string
+  this.filter = ko.observable("");
+
+  // Create a computed observable that returns a filtered (or unfiltered) obs.
+  // array based on the query typed.
+  this.filteredCafes = ko.computed(function() {
+    var filter = self.filter().toLowerCase();
+    if (!filter) {
+      // Show all markers
+      showCafes(self.markerList());
+      // Return full list
+      return self.cafeList();
+    } else {
+      return ko.utils.arrayFilter(self.cafeList(), function(cafe) {
+        if (ko.utils.stringStartsWith(cafe.name.toLowerCase(), filter)) {
+          // Return only cafés that match the filter query string as it's
+          // being typed
+          cafe.marker.setMap(map);
+          return ko.utils.stringStartsWith(cafe.name.toLowerCase(), filter);
+        } else {
+          // Hide all markers that do not match the filter query string.
+          cafe.marker.setMap(null);
+        }
+      })
+    }
+  })
 }
 
 // Adds content to info window for a particular marker
@@ -196,6 +238,7 @@ function populateInfoWindow(cafe, marker, infowindow) {
 
   infowindow.addListener('closeclick', function() {
     infowindow.marker = null;
+    toggleBounce(marker);
   })
 }
 
@@ -222,6 +265,17 @@ function getFoursquareData(cafe) {
       cafe.instagram = venue.contact.instagram;
     }
   })
+  .fail(function() {
+    console.log("Couldn't get Foursquare data")
+  })
+}
+
+function toggleBounce(marker) {
+  if (marker.getAnimation() !== null) {
+    marker.setAnimation(null);
+  } else {
+    marker.setAnimation(google.maps.Animation.BOUNCE);
+  }
 }
 
 // Iterates through a list of markers and shows them on the map

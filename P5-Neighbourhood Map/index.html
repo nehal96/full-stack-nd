@@ -10,10 +10,15 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <div class="container">
     <div id="menu">
+      <div id="menu-content">
         <h2 id="menu-heading">Cafés of Paris</h2>
-        <div id="cafelist" data-bind="foreach: cafeList">
+        <div id="filter">
+          <form>
+            <input class="form-control" data-bind="value: filter, valueUpdate: 'afterkeydown'" placeholder="Search">
+          </form>
+        </div>
+        <div id="cafelist" data-bind="foreach: filteredCafes">
           <p class="cafe" data-bind="text: name, click: $root.cafeClick"></p>
         </div>
         <div id="show-hide-cafes">
@@ -26,8 +31,11 @@
             </label>
           </div>
         </div>
+        <div id="attribution">
+          <p>Icon created by <a target="_blank" href="https://www.flaticon.com/authors/baianat">Baianat</a>. Cafe address and contact info from <a target="_blank" href="https://foursquare.com/">Foursquare</a></p>
+        </div>
+      </div>
     </div>
-  </div>
   <div id="map">
   </div>
 
@@ -36,7 +44,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
   <!-- Knockout JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-debug.js"></script>
   <!-- Custom JS -->
   <script src="js/map_styles.js"></script>
   <script src="js/app.js"></script>
