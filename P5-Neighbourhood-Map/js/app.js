@@ -200,7 +200,7 @@ function populateInfoWindow(cafe, marker, infowindow) {
       div.append(text);
       document.getElementById('streetview').append(div);
     }
-  };
+  }
 
   if (infowindow.marker != marker) {
     infowindow.marker = marker;
