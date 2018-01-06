@@ -1,4 +1,4 @@
-'use strict;'
+'use strict';
 
 // Initial data
 var cafes = [
@@ -34,7 +34,7 @@ var cafes = [
     name: "Café des Deux Moulins",
     location: {lat: 48.884921, lng: 2.333625}
   }
-]
+];
 
 // Initialise global variables
 var map,
@@ -61,7 +61,7 @@ var Cafe = function(data) {
   this.url = ko.observable();
   this.facebook = ko.observable();
   this.instagram = ko.observable();
-}
+};
 
 var ViewModel = function() {
   var self = this;
@@ -74,7 +74,7 @@ var ViewModel = function() {
   });
 
   // Create up marker icon
-  icon = 'img/tea-cup.png'
+  icon = 'img/tea-cup.png';
 
   // Initialise bounds object
   bounds = new google.maps.LatLngBounds();
@@ -94,7 +94,7 @@ var ViewModel = function() {
   // Iterate through each cafe in obs. array and add Foursquare Data
   this.cafeList().forEach(function(cafe) {
     getFoursquareData(cafe);
-  })
+  });
 
   // Iterate through the obs. array and add functionality to the map
   this.cafeList().forEach(function(cafe) {
@@ -116,11 +116,11 @@ var ViewModel = function() {
     marker.addListener('click', function() {
       toggleBounce(this);
       populateInfoWindow(cafe, this, infoWindow);
-    })
+    });
 
     // Extend the bounds of the map if needed to display the marker
     bounds.extend(cafe.location);
-  })
+  });
 
   // Apply the bounds to the map
   map.fitBounds(bounds);
@@ -128,7 +128,7 @@ var ViewModel = function() {
   // Resizes map if browser window is resized
   window.onresize = function() {
     map.fitBounds(bounds);
-  }
+  };
 
   // When the show/hide radio buttons are clicked, show/hide markers
   $('#show-hide-buttons :input').change(function() {
@@ -137,13 +137,13 @@ var ViewModel = function() {
     } else {
       hideCafes(self.markerList());
     }
-  })
+  });
 
   // Click functionality - when the cafe item is clicked on the sidebar, the
   // infobox of that particular marker opens
   this.cafeClick = function(cafe) {
     google.maps.event.trigger(cafe.marker, 'click');
-  }
+  };
 
   // Initialise a filter observable with an empty string
   this.filter = ko.observable("");
@@ -168,10 +168,10 @@ var ViewModel = function() {
           // Hide all markers that do not match the filter query string.
           cafe.marker.setMap(null);
         }
-      })
+      });
     }
-  })
-}
+  });
+};
 
 // Adds content to info window for a particular marker
 function populateInfoWindow(cafe, marker, infowindow) {
@@ -182,7 +182,7 @@ function populateInfoWindow(cafe, marker, infowindow) {
     // Resets marker info window so it can be clicked again
     infowindow.addListener('closeclick', function() {
       infowindow.marker = null;
-    })
+    });
 
     // Content string with name, address, streetview div, and contact info
     // (Website, Facebook, Instagram)
@@ -191,22 +191,23 @@ function populateInfoWindow(cafe, marker, infowindow) {
                   '<div id="streetview"></div>' +
                   '<div id="cafe-contact">' +
                   '<div><a target="_blank" href="' + cafe.url +
-                  '">Website</a></div>' + '</div>'
+                  '">Website</a></div>' + '</div>';
 
     if (cafe.facebook) {
       content += '<div><a target="_blank" href="https://www.facebook.com/' +
-                 cafe.facebook + '">Facebook</a></div>'
+                 cafe.facebook + '">Facebook</a></div>';
     }
 
     if (cafe.instagram) {
       content += '<div><a target="_blank" href="https://www.instagram.com/' +
-                 cafe.instagram + '">Instagram</a></div>'
+                 cafe.instagram + '">Instagram</a></div>';
     }
 
     // Initialise StreetView obj
     var streetViewService = new google.maps.StreetViewService();
     var radius = 50;
 
+    // Uses Google Maps StreetView APU to get the StreetView of a given location
     function getStreetView(data, status) {
       if (status == google.maps.StreetViewStatus.OK) {
         var nearStreetViewLocation = data.location.latLng;
@@ -219,17 +220,17 @@ function populateInfoWindow(cafe, marker, infowindow) {
             heading: heading,
             pitch: 10
           }
-        }
+        };
         var panorama = new google.maps.StreetViewPanorama(
           document.getElementById('streetview'), panoramaOptions);
       } else {
         infowindow.setContent(content);
         var div = document.createElement('h5');
-        var text = document.createTextNode("Sorry, couldn't get StreetView")
-        div.append(text)
+        var text = document.createTextNode("Sorry, couldn't get StreetView");
+        div.append(text);
         document.getElementById('streetview').append(div);
       }
-    }
+    };
 
     streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
 
@@ -239,9 +240,10 @@ function populateInfoWindow(cafe, marker, infowindow) {
   infowindow.addListener('closeclick', function() {
     infowindow.marker = null;
     toggleBounce(marker);
-  })
+  });
 }
 
+// Makes an AJAX request to Foursquare API
 function getFoursquareData(cafe) {
   var lat = cafe.location.lat;
   var lng = cafe.location.lng;
@@ -266,10 +268,11 @@ function getFoursquareData(cafe) {
     }
   })
   .fail(function() {
-    document.getElementById('cafe-contact').text('Could not get Foursquare data.')
-  })
+    document.getElementById('cafe-contact').text('Could not get Foursquare data.');
+  });
 }
 
+// Toggles the bounce animation for a marker
 function toggleBounce(marker) {
   if (marker.getAnimation() !== null) {
     marker.setAnimation(null);
@@ -283,7 +286,7 @@ function showCafes(markerList) {
   markerList.forEach(function(marker) {
     marker.setMap(map);
     bounds.extend(marker.position);
-  })
+  });
 
   map.fitBounds(bounds);
 }
@@ -292,7 +295,7 @@ function showCafes(markerList) {
 function hideCafes(markerList) {
   markerList.forEach(function(marker) {
     marker.setMap(null);
-  })
+  });
 }
 
 // Callback function to run web app
