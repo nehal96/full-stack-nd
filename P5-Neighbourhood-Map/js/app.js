@@ -1,4 +1,6 @@
-'use strict';
+(function() {
+  'use strict';
+}());
 
 // Initial data
 var cafes = [
@@ -49,7 +51,7 @@ var clientSecret = '&client_secret=01QBQEED02SFIDDTGEHMEYMSV4QTN1A2CCEXEMWLCM1GP
 var version = '&v=20180101';
 
 
-// Model for Cafe data
+// Model for Cafe data. 'ko' stands for Knockout, a JavaScript MVVM library
 var Cafe = function(data) {
   this.name = data.name;
   this.id = data.id;
@@ -66,7 +68,7 @@ var Cafe = function(data) {
 var ViewModel = function() {
   var self = this;
 
-  // Set up initial map
+  // Set up initial map using Google Maps API
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 48.8619068,lng: 2.3208371},
     styles: styles,
@@ -175,6 +177,31 @@ var ViewModel = function() {
 
 // Adds content to info window for a particular marker
 function populateInfoWindow(cafe, marker, infowindow) {
+  // Uses Google Maps StreetView APU to get the StreetView of a given location
+  function getStreetView(data, status) {
+    if (status == google.maps.StreetViewStatus.OK) {
+      var nearStreetViewLocation = data.location.latLng;
+      var heading = google.maps.geometry.spherical.computeHeading(
+        nearStreetViewLocation, marker.position);
+      infowindow.setContent(content);
+      var panoramaOptions = {
+        position: nearStreetViewLocation,
+        pov: {
+          heading: heading,
+          pitch: 10
+        }
+      };
+      var panorama = new google.maps.StreetViewPanorama(
+        document.getElementById('streetview'), panoramaOptions);
+    } else {
+      infowindow.setContent(content);
+      var div = document.createElement('h5');
+      var text = document.createTextNode("Sorry, couldn't get StreetView");
+      div.append(text);
+      document.getElementById('streetview').append(div);
+    }
+  };
+
   if (infowindow.marker != marker) {
     infowindow.marker = marker;
     infowindow.setContent('');
@@ -206,31 +233,6 @@ function populateInfoWindow(cafe, marker, infowindow) {
     // Initialise StreetView obj
     var streetViewService = new google.maps.StreetViewService();
     var radius = 50;
-
-    // Uses Google Maps StreetView APU to get the StreetView of a given location
-    function getStreetView(data, status) {
-      if (status == google.maps.StreetViewStatus.OK) {
-        var nearStreetViewLocation = data.location.latLng;
-        var heading = google.maps.geometry.spherical.computeHeading(
-          nearStreetViewLocation, marker.position);
-        infowindow.setContent(content);
-        var panoramaOptions = {
-          position: nearStreetViewLocation,
-          pov: {
-            heading: heading,
-            pitch: 10
-          }
-        };
-        var panorama = new google.maps.StreetViewPanorama(
-          document.getElementById('streetview'), panoramaOptions);
-      } else {
-        infowindow.setContent(content);
-        var div = document.createElement('h5');
-        var text = document.createTextNode("Sorry, couldn't get StreetView");
-        div.append(text);
-        document.getElementById('streetview').append(div);
-      }
-    };
 
     streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
 
