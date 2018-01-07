@@ -230,13 +230,14 @@ function populateInfoWindow(cafe, marker, infowindow) {
 
     // Content string with name, address, streetview div, and contact info
     // (Website, Facebook, Instagram)
+    var content;
     if (noFoursquareError()) {
-      var content = '<div><h6>' + cafe.name + '</h6></div>' +
-                    '<div data-bind="visible: noFoursquareError">' + cafe.address + '</div>' +
-                    '<div id="streetview"></div>' +
-                    '<div id="cafe-contact" data-bind="visible: noFoursquareError">' +
-                    '<div><a target="_blank" href="' + cafe.url +
-                    '">Website</a></div>' + '</div>';
+      content = '<div><h6>' + cafe.name + '</h6></div>' +
+                '<div data-bind="visible: noFoursquareError">' + cafe.address + '</div>' +
+                '<div id="streetview"></div>' +
+                '<div id="cafe-contact" data-bind="visible: noFoursquareError">' +
+                '<div><a target="_blank" href="' + cafe.url +
+                '">Website</a></div>' + '</div>';
 
       if (cafe.facebook) {
         content += '<div><a target="_blank" href="https://www.facebook.com/' +
@@ -251,7 +252,7 @@ function populateInfoWindow(cafe, marker, infowindow) {
       content = '<div><h6>' + cafe.name + '</h6></div>' +
                 '<div id="streetview"></div>' +
                 '<div id="foursquare-error">There was an error getting ' +
-                'data from Foursquare</div>'
+                'data from Foursquare</div>';
     }
 
 
