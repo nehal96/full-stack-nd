@@ -42,7 +42,8 @@ var cafes = [
 var map,
     icon,
     bounds,
-    infoWindow;
+    infoWindow,
+    noFoursquareError;
 
 // Create Foursquare API URL variables
 var baseUrl = 'https://api.foursquare.com/v2/venues/';
@@ -84,9 +85,11 @@ var ViewModel = function() {
   // Initialise info window
   infoWindow = new google.maps.InfoWindow();
 
-  // Initialise observable array for cafes
+  // Initialise observable array for cafes and markers
   this.cafeList = ko.observableArray();
   this.markerList = ko.observableArray();
+
+  noFoursquareError = ko.observable(false);
 
   // Iterate through the data and add object to obs. array
   cafes.forEach(function(cafeitem) {
@@ -95,7 +98,9 @@ var ViewModel = function() {
 
   // Iterate through each cafe in obs. array and add Foursquare Data
   this.cafeList().forEach(function(cafe) {
-    getFoursquareData(cafe);
+    if (cafe.foursquareId !== null) {
+      getFoursquareData(cafe);
+    }
   });
 
   // Iterate through the obs. array and add functionality to the map
@@ -133,6 +138,18 @@ var ViewModel = function() {
   };
 
   // When the show/hide radio buttons are clicked, show/hide markers
+  //this.radioSelectedOptionValue = ko.observable("show");
+
+  //this.hideAllCafes = function(markerList) {
+  //  hideCafes(self.markerList);
+  //}
+
+  //if (this.radioSelectedOptionValue() == 'show') {
+  //  showCafes(self.markerList());
+  //} else {
+  //  hideCafes(self.markerList());
+  //}
+  /*
   $('#show-hide-buttons :input').change(function() {
     if (this.value == "show") {
       showCafes(self.markerList());
@@ -140,7 +157,7 @@ var ViewModel = function() {
       hideCafes(self.markerList());
     }
   });
-
+  */
   // Click functionality - when the cafe item is clicked on the sidebar, the
   // infobox of that particular marker opens
   this.cafeClick = function(cafe) {
@@ -213,22 +230,30 @@ function populateInfoWindow(cafe, marker, infowindow) {
 
     // Content string with name, address, streetview div, and contact info
     // (Website, Facebook, Instagram)
-    var content = '<div><h6>' + cafe.name + '</h6></div>' +
-                  '<div>' + cafe.address + '</div>' +
-                  '<div id="streetview"></div>' +
-                  '<div id="cafe-contact">' +
-                  '<div><a target="_blank" href="' + cafe.url +
-                  '">Website</a></div>' + '</div>';
+    if (noFoursquareError()) {
+      var content = '<div><h6>' + cafe.name + '</h6></div>' +
+                    '<div data-bind="visible: noFoursquareError">' + cafe.address + '</div>' +
+                    '<div id="streetview"></div>' +
+                    '<div id="cafe-contact" data-bind="visible: noFoursquareError">' +
+                    '<div><a target="_blank" href="' + cafe.url +
+                    '">Website</a></div>' + '</div>';
 
-    if (cafe.facebook) {
-      content += '<div><a target="_blank" href="https://www.facebook.com/' +
-                 cafe.facebook + '">Facebook</a></div>';
+      if (cafe.facebook) {
+        content += '<div><a target="_blank" href="https://www.facebook.com/' +
+                   cafe.facebook + '">Facebook</a></div>';
+      }
+
+      if (cafe.instagram) {
+        content += '<div><a target="_blank" href="https://www.instagram.com/' +
+                   cafe.instagram + '">Instagram</a></div>';
+      }
+    } else {
+      content = '<div><h6>' + cafe.name + '</h6></div>' +
+                '<div id="streetview"></div>' +
+                '<div id="foursquare-error">There was an error getting ' +
+                'data from Foursquare</div>'
     }
 
-    if (cafe.instagram) {
-      content += '<div><a target="_blank" href="https://www.instagram.com/' +
-                 cafe.instagram + '">Instagram</a></div>';
-    }
 
     // Initialise StreetView obj
     var streetViewService = new google.maps.StreetViewService();
@@ -241,7 +266,6 @@ function populateInfoWindow(cafe, marker, infowindow) {
 
   infowindow.addListener('closeclick', function() {
     infowindow.marker = null;
-    toggleBounce(marker);
   });
 }
 
@@ -267,10 +291,11 @@ function getFoursquareData(cafe) {
       cafe.url = venue.url;
       cafe.facebook = venue.contact.facebookUsername;
       cafe.instagram = venue.contact.instagram;
+      noFoursquareError(true);
     }
   })
   .fail(function() {
-    document.getElementById('cafe-contact').text('Could not get Foursquare data.');
+    noFoursquareError(false);
   });
 }
 
@@ -280,6 +305,9 @@ function toggleBounce(marker) {
     marker.setAnimation(null);
   } else {
     marker.setAnimation(google.maps.Animation.BOUNCE);
+    setTimeout(function() {
+      marker.setAnimation(null);
+    }, 700);
   }
 }
 
@@ -298,6 +326,13 @@ function hideCafes(markerList) {
   markerList.forEach(function(marker) {
     marker.setMap(null);
   });
+}
+
+// Callback function if there is an error loading Google Maps
+function mapError() {
+  $('#map')
+    .addClass('error')
+    .append('<div id="map-error">Sorry, could not load Google Maps. 😞</div>');
 }
 
 // Callback function to run web app

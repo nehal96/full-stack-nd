@@ -8,4 +8,6 @@
 
 ### How to Run this Project
 
-[Click here](https://nehal96.github.io/full-stack-nd/P5-Neighbourhood-Map/) to view the website!
+**Option 1:** [Click here](https://nehal96.github.io/full-stack-nd/P5-Neighbourhood-Map/) to view the website!
+
+**Option 2:** Either clone the repo or download the files through GitHub, and double-click on `index.html` to open the website on your default browser. Alternatively, you may opt host the app on `localhost` (run `python -m http.server` for Python), and then enter the local address in your web browser.

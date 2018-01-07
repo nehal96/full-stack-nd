@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <div id="menu">
+    <aside id="menu">
       <div id="menu-content">
         <h2 id="menu-heading">Cafés of Paris</h2>
         <div id="filter">
@@ -21,23 +21,26 @@
         <div id="cafelist" data-bind="foreach: filteredCafes">
           <p class="cafe" data-bind="text: name, click: $root.cafeClick"></p>
         </div>
+        <!--
         <div id="show-hide-cafes">
           <div id="show-hide-buttons" class="btn-group" data-toggle="buttons">
-            <label class="show-hide-btn btn btn-outline-success active">
-              <input type="radio" name="show-hide" id="show-cafes" value="show" data-bind="click: showCafes" autocomplete="off" checked>Show Cafés
+            <label id="show-button" class="show-hide-btn btn btn-outline-success active">
+              <input type="radio" name="show-hide" id="show-cafes" value="show" data-bind="checked: radioSelectedOptionValue" autocomplete="off"/>Show Cafés
             </label>
-            <label class="show-hide-btn btn btn-outline-danger">
-              <input type="radio" name="show-hide" id="hide-cafes" value="hide" data-bind="click: hideCafes" autocomplete="off">Hide Cafés
+            <label id="hide-button" class="show-hide-btn btn btn-outline-danger">
+              <input type="radio" name="show-hide" id="hide-cafes" value="hide" data-bind="checked: radioSelectedOptionValue" autocomplete="off"/>Hide Cafés
             </label>
+            <p data-bind="text: radioSelectedOptionValue"></p>
           </div>
         </div>
+      -->
         <div id="attribution">
           <p>Icon created by <a target="_blank" href="https://www.flaticon.com/authors/baianat">Baianat</a>. Cafe address and contact info from <a target="_blank" href="https://foursquare.com/">Foursquare</a></p>
         </div>
       </div>
+    </aside>
+    <div id="map">
     </div>
-  <div id="map">
-  </div>
 
   <!-- Bootstrap JavaScript -->
   <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
@@ -46,13 +49,11 @@
   <!-- Knockout JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-debug.js"></script>
   <!-- Custom JS -->
-  <!-- https://stackoverflow.com/questions/45338480/try-catch-for-error-message-in-google-maps-api -->
-  <script>window.gm_authFailure = function() { alert('Google Maps failed to load.') }</script>
   <script src="js/map_styles.js"></script>
   <script src="js/app.js"></script>
   <!-- Google Maps API -->
   <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCsa2A7GAMfZEDaCTu4_0rrt214rFION4k&libraries=geometry&v=3&callback=runApp">
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCsa2A7GAMfZEDaCTu4_0rrt214rFION4k&libraries=geometry&v=3&callback=runApp" onerror="mapError()">
   </script>
 </body>
 </html>
